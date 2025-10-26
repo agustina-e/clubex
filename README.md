@@ -30,3 +30,13 @@ Backend: Node.js, Express, Socket.IO
 Microservicio: Python con Flask para la lógica del Tamagotchi
 
 Base de datos: MongoDB
+
+---
+
+## Vista del Sistema
+
+![Captura de Clubex](https://github.com/user-attachments/assets/c281d878-2fa1-4856-8e1c-a827ceac60c4)
+
+---
+
+## Este proyecto se encuentra en curso...
