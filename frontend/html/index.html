@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Login Form</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cludflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+</head>
+<body>
+    <div class="container" id="main">
+        <div class="sign-up">
+            <form id="registerForm" action="" autocomplete="off">
+                <h1 class="titulo-princ">¡Crea tu cuenta!</h1>
+                <input name="username" placeholder="Nombre de usuario" type="text" required>
+                <input name="password" placeholder="Contraseña" type="password" required >
+                <input name="confirm_password" placeholder="Confirmar contraseña" type="password" required>
+                <input name="email" placeholder="Email" type="email" required>
+                <input name="edad" placeholder="Edad" type="number" min="12" max="25" required>
+                <button class="boton-princ" type="submit">Registrarse</button>
+            </form>
+        </div>
+        <div class="login">
+            <form id="loginForm" action="" autocomplete="off">
+                <h1 class="titulo-princ">¡Hola de nuevo!</h1>
+                <input name="username" placeholder="Usuario" type="text" required>
+                <input name="password" placeholder="Contraseña" type="password" required>
+                <a href="#">¿Olvidaste tu contraseña?</a>
+                <button class="boton-princ" type="submit">Entrar</button>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-left">
+                    <h1>Si ya tenés una cuenta,<br>iniciá sesión desde acá</h1>
+                    <button id="login">Acceder</button>
+                </div>
+                <div class="overlay-right">
+                    <h1>Si no tenés una cuenta,<br>registrate desde acá</h1>
+                    <button id="signUp">Registro</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        const signUpButton = document.getElementById('signUp')
+        const loginButton = document.getElementById('login')
+        const main = document.getElementById('main')
+
+        signUpButton.addEventListener('click', () => {
+            main.classList.add("right-panel-active");
+        });
+        loginButton.addEventListener('click', () => {
+            main.classList.remove("right-panel-active");
+        });
+    </script>
+    <script src="../scripts/auth.js" defer></script>
+    <script src="../scripts/estadoSistemas.js"></script>
+</body>
+</html>

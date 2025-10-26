@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CluBex - Mundo</title>
+  <link rel="stylesheet" href="../styles/mundo.css">
+</head>
+<body>
+  <!-- 🔝 Barra de navegación superior -->
+  <nav id="top-bar">
+    <span class="nombre-usu">Usuario:</span>
+    <span id="username-display" class="nombre-usu"></span>
+    <span id="coins-display">Monedas: 0</span>
+  <!-- futuro: avatar mini, icono amigos, solicitudes -->
+  </nav>
+    
+
+  <!-- 🎮 HUD (hambre, sed, aburrimiento, vida) -->
+  <div id="hud">
+    <div class="stat">❤️ Vida: <span id="vida">100</span></div>
+    <div class="stat">🍗 Hambre: <span id="hambre">0</span></div>
+    <div class="stat">💧 Sed: <span id="sed">0</span></div>
+    <div class="stat">🎲 Aburrimiento: <span id="aburrimiento">0</span></div>
+  </div>
+
+  <!-- 🗺️ Botón para abrir el mapa (siempre visible) -->
+  <button id="map-button">🗺️ Mapa</button>
+
+  <!-- 🧱 Contenedor general del layout -->
+  <div id="main-layout">
+    <!-- 💬 Chat lateral izquierdo -->
+    <aside id="chat-section">
+      <div id="chat-log"></div>
+      <input type="text" id="chat-input" placeholder="Escribí tu mensaje..." />
+      <button id="send-message">Enviar</button>
+    </aside>
+
+    <!-- 🌆 Mundo principal -->
+    <main id="world-container">
+      <!-- Escenario: techo actual -->
+      <div id="techo-actual" class="techo">
+        <div id="left-jump" class="jump-sign">← Saltar a techo 1</div>
+
+        <div id="avatar">
+          <img src="/assets/avatar_gris.png" alt="Tu Gatito" id="gatito-sprite">
+          <div id="avatar-name"></div> <!-- 👈 Nombre del avatar se inyecta desde JS -->
+        </div>
+
+        <div id="right-jump" class="jump-sign">Saltar a techo 2 →</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 🗺️ Cuadro del mapa (emergente) -->
+  <div id="map-popup" class="hidden">
+    <div id="map-content">
+      <h2>Mapa del Mundo</h2>
+      <button class="map-location" data-location="plaza">Plaza Gato</button>
+      <button class="map-location" data-location="techo1">Techo 1</button>
+      <button class="map-location" data-location="techo2">Techo 2</button>
+      <button class="map-location" data-location="casa">Tu casa</button>
+      <button id="close-map">Cerrar</button>
+    </div>
+  </div>
+
+  <script src="../scripts/mundo.js"></script>
+
+  <!-- 🐾 Selector visual de color -->
+  <div id="color-popup" class="hidden">
+    <div id="color-content">
+      <h2>Elegí el color de tu gatito</h2>
+      <div id="color-options">
+        <!-- Previsualización grande del gatito -->
+        <img id="color-preview" src="/assets/avatar_gris.png" alt="Previsualización del gatito">
+
+        <!-- Colores disponibles -->
+        <div id="color-choices">
+          <label class="color-choice" data-color="gris">
+            <input type="radio" name="avatar_color" value="gris" checked>
+            <div class="color-box gris"></div>
+          </label>
+          <label class="color-choice" data-color="naranja">
+            <input type="radio" name="avatar_color" value="naranja">
+            <div class="color-box naranja"></div>
+          </label>
+          <label class="color-choice" data-color="blanco">
+            <input type="radio" name="avatar_color" value="blanco">
+            <div class="color-box blanco"></div>
+          </label>
+          <label class="color-choice" data-color="negro">
+            <input type="radio" name="avatar_color" value="negro">
+            <div class="color-box negro"></div>
+          </label>
+          <label class="color-choice" data-color="marron">
+            <input type="radio" name="avatar_color" value="marron">
+            <div class="color-box marron"></div>
+          </label>
+          <label class="color-choice" data-color="crema">
+            <input type="radio" name="avatar_color" value="crema">
+            <div class="color-box crema"></div>
+          </label>
+        </div>
+      </div>
+      <button id="save-color">Guardar</button>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "clubex-frontend",
+  "version": "1.0.0",
+  "description": "Frontend del juego CluBex con Phaser",
+  "main": "game.js",
+  "scripts": {
+    "start": "live-server",
+    "dev": "live-server --port=3000 --no-browser"
+  },
+  "keywords": [
+    "clubex",
+    "phaser",
+    "frontend"
+  ],
+  "author": "Agustina",
+  "license": "ISC",
+  "dependencies": {
+    "phaser": "^3.88.2"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

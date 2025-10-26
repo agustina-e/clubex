@@ -1,0 +1,13 @@
+{
+    "nombre": "Usuario1",
+    "hambre": 96,
+    "sed": 96,
+    "aburrimiento": 30,
+    "vida": 0,
+    "estado_coma": false,
+    "tiempo_coma": 0,
+    "comas_start_time": null,
+    "recovery_start_time": null,
+    "monedas": 100,
+    "last_aburrimiento_update": "2025-04-12T16:45:12.150339"
+}
