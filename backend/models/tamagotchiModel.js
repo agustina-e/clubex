@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../sequelize.js';
+import sequelize from '../database/sequelize.js';
 
 const Tamagotchi = sequelize.define('Tamagotchi', {
   nombre: { type: DataTypes.STRING, allowNull: false },

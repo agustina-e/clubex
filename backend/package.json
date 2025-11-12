@@ -2,10 +2,10 @@
   "name": "clubex-backend",
   "version": "1.0.0",
   "description": "Backend del juego CluBex con Express, Socket.IO y MongoDB",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [
     "clubex",
@@ -29,5 +29,5 @@
   "devDependencies": {
     "nodemon": "^3.1.9"
   },
-  "type": "module"  
+  "type": "module"
 }
