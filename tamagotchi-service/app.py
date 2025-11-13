@@ -4,7 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from werkzeug.security import generate_password_hash, check_password_hash
 import atexit
 import os
-from tamagotchi import cargar_estado, guardar_estado
+from models.tamagotchi import cargar_estado, guardar_estado
 from database import init_db, get_db
 
 # ————— Inicialización —————
@@ -29,10 +29,25 @@ def home():
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'html'))
     return send_from_directory(base_dir, 'index.html')
 
-@app.route("/html/mundo.html")
-def mundo():
+@app.route("/html/<path:filename>")
+def serve_html(filename):
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'html'))
-    return send_from_directory(base_dir, 'mundo.html')
+    return send_from_directory(base_dir, filename)
+
+@app.route("/styles/<path:filename>")
+def serve_styles(filename):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'styles'))
+    return send_from_directory(base_dir, filename)
+
+@app.route("/scripts/<path:filename>")
+def serve_scripts(filename):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'scripts'))
+    return send_from_directory(base_dir, filename)
+
+@app.route("/img/<path:filename>")
+def serve_images(filename):
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'img'))
+    return send_from_directory(base_dir, filename)
 
 @app.route("/ping")
 def ping():
@@ -84,27 +99,28 @@ def estado_completo():
 
 @app.route("/api/check-username", methods=["GET"])
 def check_username():
-    username = request.args.get("username")
+    username = (request.args.get("username") or "").strip()
     if not username:
         return jsonify({"error": "No se proporcionó username"}), 400
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE username = ?", (username,))
-    disponible = (cursor.fetchone()[0] == 0)
+    # buscar case-insensitive
+    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE lower(username) = ?", (username.lower(),))
+    exists = (cursor.fetchone()[0] > 0)   # true si existe en DB
     conn.close()
-    return jsonify({"exists": disponible}), 200
+    return jsonify({"exists": exists}), 200
 
 @app.route("/api/check-email", methods=["GET"])
 def check_email():
-    email = request.args.get("email")
+    email = (request.args.get("email") or "").strip()
     if not email:
         return jsonify({"error": "No se proporcionó email"}), 400
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE email = ?", (email,))
-    disponible = (cursor.fetchone()[0] == 0)
+    cursor.execute("SELECT COUNT(*) FROM usuarios WHERE lower(email) = ?", (email.lower(),))
+    exists = (cursor.fetchone()[0] > 0)
     conn.close()
-    return jsonify({"exists": disponible}), 200
+    return jsonify({"exists": exists}), 200
 
 @app.route("/register", methods=["POST"])
 def register():

@@ -18,27 +18,23 @@
 
 
 @echo off
-REM -- Base dir del script
 set SCRIPT_DIR=%~dp0
 
-REM -- Inicializar la base de datos (si corresponde)
-start /B cmd /C "cd /d \"%SCRIPT_DIR%..\\tamagotchi-service\" && python database.py"
+REM -- Inicializar la base de datos (opcional)
+start /B "" cmd /C "cd /d "%SCRIPT_DIR%..\tamagotchi-service" && python database.py"
 
-REM -- Levantar el servidor de backend (Node.js)
-start cmd /K "cd /d \"%SCRIPT_DIR%..\\backend\" && npm start && pause"
+REM -- Backend
+start "BACKEND" cmd /K "cd /d "%SCRIPT_DIR%..\backend" && npm start"
 
-REM -- Levantar el frontend (si tienes un script dev)
-start cmd /K "cd /d \"%SCRIPT_DIR%..\\frontend\" && npm run dev && pause"
+REM -- Frontend en puerto distinto si hay conflicto
+start "FRONTEND" cmd /K "cd /d "%SCRIPT_DIR%..\frontend" && npx live-server --port=3001 --no-browser"
 
-REM -- Levantar Flask (Tamagotchi)
-start cmd /K "cd /d \"%SCRIPT_DIR%..\\tamagotchi-service\" && venv\\Scripts\\activate && python app.py && pause"
+REM -- Flask Tamagotchi (activar venv)
+start "TAMAGOTCHI" cmd /K "cd /d "%SCRIPT_DIR%..\tamagotchi-service" && call venv\Scripts\activate.bat && python app.py"
 
-REM -- Levantar el servicio de cron para actualizar atributos (ajustado a ruta scripts)
-start cmd /C "cd /d \"%SCRIPT_DIR%..\\backend\" && node scripts/cron.js"
+REM -- CRON (archivo CommonJS .cjs)
+start "CRON" cmd /K "cd /d "%SCRIPT_DIR%..\backend" && node scripts/cron.cjs"
 
-REM -- Esperar unos segundos para asegurarse de que los servidores estén arriba
-timeout /t 5
-
-REM -- Abrir el navegador automáticamente en la URL del juego
-start http://localhost:3000/html/index.html
-
+timeout /t 6 /nobreak > nul
+start "" "http://127.0.0.1:3001/html/index.html"
+exit /b 0

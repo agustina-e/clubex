@@ -4,21 +4,26 @@
 }
 
 body{
-    align-items: center;
     display: flex;
+    align-items: center;
     justify-content: center;
     flex-direction: column;
     background-image: url(../img/CluBex.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center top;
     font-family: sans-serif;
     min-height: 100%;
-    margin: 10%;
+    margin: 0;
+    padding: 5% 0; /* opcional: espacio superior/inferior sin romper el fondo */
 }
 
 .container{
     position: relative;
-    width: 6000px;
+    margin-top: 50px;
+    width: 80%;
     max-width: 100%;
-    min-height: 550px;
+    min-height: 900px;
     border-radius: 10px;
     overflow: hidden;
     --main-color: #323232;
@@ -46,6 +51,8 @@ body{
 
 form{
     background: url(../img/gatitos2.png); /*linear-gradient(to right, #574470, #d982ff); */
+    background-repeat: no-repeat;
+    background-size: cover;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,15 +63,15 @@ form{
 }
 
 h1{
-    font-size: 30px;
+    font-size: 50px;
     font-weight: bold;
-    line-height: 60px;
+    line-height: 80px;
     margin: 0;
     padding-bottom: 20px;
 }
 
 .titulo-princ{
-    font-size: 45px;
+    font-size: 50px;
     margin-top: 30px;
 }
 

@@ -9,68 +9,98 @@ document.addEventListener('DOMContentLoaded', () => {
   const usernameSpan      = document.getElementById('username-display');
   const avatarName        = document.getElementById('avatar-name');
 
-  // Elementos del popup de color
-  const colorPopup      = document.getElementById('color-popup');
-  const colorOptions    = document.querySelectorAll('input[name="avatar_color"]');
-  const colorPreview    = document.getElementById('color-preview');
-  const saveColorBtn    = document.getElementById('save-color');
+  // // Elementos del popup de color (debe existir en el HTML)
+  // const colorPopup      = document.getElementById('color-popup');
+  // const colorOptions    = document.querySelectorAll('input[name="avatar_color"]');
+  // const colorPreview    = document.getElementById('color-preview');
+  // const saveColorBtn    = document.getElementById('save-color');
 
-  // Sprite del avatar en el mundo
+  const colorPopup      = document.getElementById('color-popup');
+  const colorPreview    = document.getElementById('color-preview');
+  const colorChoices    = document.querySelectorAll('#color-choices .color-choice');
+  const colorInputs     = document.querySelectorAll('input[name="avatar_color"]');
+  const saveColorBtn    = document.getElementById('save-color');
   const avatarSprite    = document.getElementById('gatito-sprite');
 
-  // ——————— Current User ———————
   const currentUsername = localStorage.getItem('clubex_username') || 'Invitado';
-  usernameSpan.textContent = currentUsername;
-  avatarName.textContent   = currentUsername;
+  const popupSeenKey = `clubex_seen_color_popup_${currentUsername}`;
+  let selectedColor = 'gris';
 
-  let selectedColor = "gris"; // color por defecto
-
-  // ——————— Color del avatar ———————
-  if (currentUsername === "Invitado") {
-    aplicarColor("gris");
-  } else {
-    fetch(`http://localhost:5000/api/user/${encodeURIComponent(currentUsername)}/color`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.avatar_color) {
-          colorPopup.classList.remove('hidden');
-          aplicarColor("gris"); // mostrar gris en preview por defecto
-          colorPreview.src = "/assets/avatar_gris.png";
-        } else {
-          aplicarColor(data.avatar_color);
-        }
-      });
+  function avatarPath(color) {
+    return `../assets/avatars/gatito_${color}.png`;
   }
-
-  // Al hacer clic en un color, actualizar preview y variable
-  colorOptions.forEach(option => {
-    option.addEventListener('click', () => {
-      selectedColor = option.value;
-      colorPreview.src = `/assets/avatar_${selectedColor}.png`;
-    });
-  });
-
-  // Guardar color elegido
-  saveColorBtn.addEventListener('click', () => {
-    if (!selectedColor) return alert("Elegí un color");
-
-    fetch(`http://localhost:5000/api/user/${encodeURIComponent(currentUsername)}/color`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ avatar_color: selectedColor })
-    })
-    .then(res => res.json())
-    .then(() => {
-      colorPopup.classList.add('hidden');
-      aplicarColor(selectedColor);
-    });
-  });
 
   function aplicarColor(color) {
-    if (avatarSprite) {
-      avatarSprite.src = `/assets/avatar_${color}.png`;
-    }
+    selectedColor = color;
+    if (avatarSprite) avatarSprite.src = avatarPath(color);
+    if (colorPreview) colorPreview.src = avatarPath(color);
+    // marcar input correspondiente
+    const inp = document.querySelector(`input[name="avatar_color"][value="${color}"]`);
+    if (inp) inp.checked = true;
   }
+
+  // Inicializar: pedir color al servidor; si no hay, mostrar popup (solo la primera vez)
+  if (currentUsername === 'Invitado') {
+    aplicarColor('gris');
+  } else {
+    fetch(`http://localhost:5000/api/user/${encodeURIComponent(currentUsername)}/color`)
+      .then(r => r.json())
+      .then(data => {
+        const serverColor = data && data.avatar_color ? data.avatar_color : null;
+        if (!serverColor && !localStorage.getItem(popupSeenKey)) {
+          // mostrar modal obligatorio (bloquea fondo)
+          if (colorPopup) {
+            colorPopup.classList.remove('hidden');
+            document.documentElement.classList.add('modal-open');
+            aplicarColor('gris');
+          }
+        } else {
+          aplicarColor(serverColor || 'gris');
+        }
+      })
+      .catch(() => aplicarColor('gris'));
+  }
+
+  // Click sobre label -> actualizar preview inmediatamente
+  colorChoices.forEach(label => {
+    label.addEventListener('click', (e) => {
+      const color = label.dataset.color;
+      // marcar el input asociado (por si el click no lo hizo)
+      const inp = label.querySelector('input[name="avatar_color"]');
+      if (inp) inp.checked = true;
+      aplicarColor(color);
+    });
+  });
+
+  // También escuchar cambios directos en inputs (por teclado)
+  colorInputs.forEach(inp => {
+    inp.addEventListener('change', () => {
+      if (inp.checked) aplicarColor(inp.value);
+    });
+  });
+
+  // Guardar color en backend y cerrar popup (obligatorio en primera sesión)
+  saveColorBtn?.addEventListener('click', async () => {
+    if (!selectedColor) return alert('Elegí un color.');
+    try {
+      const res = await fetch(`http://localhost:5000/api/user/${encodeURIComponent(currentUsername)}/color`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ avatar_color: selectedColor })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || 'Error guardando color');
+      }
+      localStorage.setItem(popupSeenKey, 'true');
+      if (colorPopup) colorPopup.classList.add('hidden');
+      document.documentElement.classList.remove('modal-open');
+      aplicarColor(selectedColor);
+    } catch (err) {
+      console.error('Error guardando color:', err);
+      alert('No se pudo guardar el color. Revisá la consola.');
+    }
+  });
 
   // ——————— Welcome Message ———————
   const welcomeMessage = document.createElement('p');
