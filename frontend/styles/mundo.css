@@ -12,12 +12,14 @@ html, body {
   background-color: #f5f5f5;
 }
   
-  /* 🔝 Barra de navegación */
+
+/* 🔝 Barra de navegación */
 #top-bar {
   background-color: #1c1c1c;
   color: white;
   display: flex;
-  justify-content: start;
+  align-items: center;
+  gap: 12px;
   padding: 10px;
   font-size: 16px;
 }
@@ -27,10 +29,28 @@ html, body {
 }
 
 #coins-display{
-  margin-left: 86%;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+
+/* Botón de cerrar sesión */
+#logout-btn {
+  padding: 6px 10px;
+  background: #993232;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#logout-btn:hover {
+  background: #be4040;
 }
   
-  /* 🎮 HUD (stats) */
+
+/* 🎮 HUD (stats) */
 #hud {
   position: absolute;
   top: 50px;
@@ -92,9 +112,9 @@ html, body {
 }
   
   /* 🌍 Mundo principal */
-#game-world {
+#world-container {
   flex-grow: 1;
-  position: relative;
+  position: relative; /* importante: contenedor posicionado para que avatar absolute use sus límites */
   overflow: hidden;
   padding: 20px;
 }
@@ -102,9 +122,13 @@ html, body {
   /* 🧱 Techo */
 #techo-actual {
   position: relative;
-  background-color: #ddd;
-  height: 200px;
+  background-image: url('../assets/img/techo_princ.png'); 
+  background-size: cover; 
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100%;
   border-radius: 10px;
+  transition: opacity 240ms ease; /* para el fade */
 }
   
 #left-jump, #right-jump {
@@ -129,14 +153,24 @@ html, body {
   
 #avatar {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
+  transform: none;
+  z-index: 30; /* encima del escenario */
+  pointer-events: none; /* evita que el avatar capture clicks por defecto */
 }
   
 #avatar img {
   width: 100px;
   height: auto;
+  pointer-events: auto; /* si querés que la imagen reciba clicks, quitá pointer-events:none arriba */
+}
+
+#avatar-name{
+  background-color: #000000a9;
+  color: white;
+  padding-left: 20px;
+  border-radius: 10px;
 }
   
   /* 🗺️ Botón Mapa */

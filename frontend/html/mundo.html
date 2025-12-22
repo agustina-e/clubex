@@ -11,6 +11,7 @@
     <span class="nombre-usu">Usuario:</span>
     <span id="username-display" class="nombre-usu"></span>
     <span id="coins-display">Monedas: 0</span>
+    <button id="logout-btn" type="button">Cerrar sesión</button>
   <!-- futuro: avatar mini, icono amigos, solicitudes -->
   </nav>
     
@@ -37,16 +38,14 @@
 
     <!-- Mundo principal -->
     <main id="world-container">
-      <!-- Escenario: techo actual -->
-      <div id="techo-actual" class="techo">
-        <div id="left-jump" class="jump-sign">← Saltar a techo 1</div>
-
-        <div id="avatar">
+      <div id="avatar">
           <img src="../assets/avatars/gatito_gris.png" alt="Tu Gatito" id="gatito-sprite">
           <div id="avatar-name"></div> <!-- 👈 Nombre del avatar se inyecta desde JS -->
         </div>
-
-        <div id="right-jump" class="jump-sign">Saltar a techo 2 →</div>
+      <!-- Escenario: techo actual -->
+      <div id="techo-actual" class="techo">
+        <div id="left-jump" class="jump-sign">← Saltar a Tienda</div>
+        <div id="right-jump" class="jump-sign">Saltar a Jardín →</div>
       </div>
     </main>
   </div>

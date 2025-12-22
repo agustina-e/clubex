@@ -179,6 +179,7 @@ def debug_user(username):
         "password": user[2],
         "email":    user[3],
         "edad":     user[4],
+        "avatar_color": user[5] if len(user) > 5 else None
     })
     
 # Obtener el color de avatar de un usuario
@@ -207,6 +208,7 @@ def set_avatar_color(username):
     conn = get_db()
     cur = conn.cursor()
     cur.execute("UPDATE usuarios SET avatar_color = ? WHERE username = ?", (color, username))
+    app.logger.info("DEBUG set_avatar_color: user=%s color=%s", username, color)
     conn.commit()
     conn.close()
 
