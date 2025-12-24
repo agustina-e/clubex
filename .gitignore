@@ -2,6 +2,8 @@
 /backend/data/*.sqlite
 /backend/data/*.db
 /tamagotchi-service/usuarios.db
+/tamagotchi-service/venv/
+/backups/
 /.env
 dist
 .DS_Store
