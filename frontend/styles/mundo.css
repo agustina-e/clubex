@@ -79,13 +79,13 @@ html, body {
   
   /* 💬 Chat lateral */
 #chat-section {
-  width: 300px;
+  width: 260px; /* reducido para achicar espacio en blanco */
   background-color: #fff;
   border-right: 1px solid #ccc;
-  padding: 10px;
+  padding: 20px; /* igual que #world-container para alinear verticalmente */
   display: flex;
   flex-direction: column;
-}
+} 
   
 #chat-log {
   flex-grow: 1;
@@ -94,22 +94,38 @@ html, body {
 }
   
 #chat-input {
-  padding: 8px;
-  margin-bottom: 5px;
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0 6px 0;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #fff;
 }
   
 #send-message {
-  padding: 10px;
-  background-color: #007bff;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(180deg,#007bff,#0062cc);
   color: white;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0,123,255,0.12);
+  font-weight: 600;
 }
-  
+
 #send-message:hover {
-  background-color: #0056b3;
+  background: linear-gradient(180deg,#0a7bff,#0056b3);
 }
+
+/* ensure the input and button stay at the bottom of the chat column */
+#chat-section { display: flex; flex-direction: column; }
+#chat-log { flex: 1 1 auto; }
+#chat-controls { display: flex; flex-direction: column; gap: 6px; margin-top: auto; } /* pega los controles al fondo del chat */
+#chat-controls > * { width: 100%; }
+
   
   /* 🌍 Mundo principal */
 #world-container {
@@ -122,7 +138,6 @@ html, body {
   /* 🧱 Techo */
 #techo-actual {
   position: relative;
-  background-image: url('../assets/img/techo_princ.png'); 
   background-size: cover; 
   background-position: center;
   background-repeat: no-repeat;
@@ -198,26 +213,58 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
   display: none;
   justify-content: center;
   align-items: center;
-  z-index: 20;
+  z-index: 1000;
 }
   
 #map-content {
   background-color: #fff;
-  padding: 20px;
+  padding: 18px;
   border-radius: 10px;
   text-align: center;
-  width: 300px;
+  width: min(720px, 92vw);
+  max-height: 90vh;
+  overflow: auto;
+  position: relative;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
 }
-  
-.map-location {
-  display: block;
-  width: 100%;
-  margin: 5px 0;
+
+#map-content h2 { margin-top: 4px; margin-bottom: 12px; }
+
+#map-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #333;
 }
+
+.map-wrapper { position: relative; display: flex; justify-content: center; align-items: center; }
+#map-image { width: 100%; height: auto; max-width: 680px; border-radius: 8px; display: block; }
+
+/* Hotspots: transparent buttons positioned in percentages; visible on hover */
+.map-hotspot {
+  position: absolute;
+  background: rgba(255,255,255,0.02);
+  border: 2px solid rgba(255,255,255,0.0);
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, transform 120ms;
+  border-radius: 8px;
+}
+.map-hotspot:hover { background: rgba(255,255,255,0.12); border-color: rgba(0,0,0,0.06); transform: scale(1.02); }
+.map-hotspot[title]::after { content: attr(title); position: absolute; bottom: -26px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 4px 8px; font-size: 12px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 120ms; }
+.map-hotspot:hover::after { opacity: 1; }
+
+.map-placeholder { width: 100%; padding: 40px; text-align: center; background: linear-gradient(180deg,#f6efe4,#efe2ca); color: #5a4631; border-radius: 6px; font-weight: 600; }
+
+.map-location { display: none; } /* legacy buttons hidden */
 
   /*desplegable de la eleccion del avatar*/
 #color-popup {
@@ -297,6 +344,45 @@ html, body {
 .color-box.marron  { background-color: saddlebrown; }
 .color-box.crema   { background-color: wheat; }
 
+/* Chat styles: wrapping, vertical scroll, message appearance */
+#chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  max-height: calc(100% - 100px); /* reduce espacio en blanco disponible debajo */
+  overflow-y: hidden; /* ocultar scroll vertical: solo se muestran mensajes que entran */
+  overflow-x: hidden;
+  word-wrap: break-word;
+} 
+
+.chat-msg {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f1f1f1;
+  font-size: 14px;
+  line-height: 1.2;
+  word-break: break-word;
+  white-space: normal;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-text {
+  white-space: normal;
+  word-break: break-word;
+  width: 100%;
+}
+
+
+.chat-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+}
+
+.chat-msg.system { background: rgba(0,0,0,0.05); font-style: italic; color: #333; }
+.chat-msg.me { background: #d1e7ff; align-self: flex-end; }
 
 .modal-open { overflow: hidden; } /* evita scroll de fondo cuando el modal está activo */
 #techo-actual.dimmed { filter: brightness(0.35); pointer-events: none; } /* opcional: oscurece y evita clicks */

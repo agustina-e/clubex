@@ -2,9 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CluBex - Mundo</title>
   <link rel="stylesheet" href="../styles/mundo.css">
-</head>
+  <link id="favicon" rel="icon" href="/assets/img/favicon.png">
+  <script>
+    // Activar favicon subido y evitar cache viejo añadiendo ?v=timestamp si existe
+    (function(){
+      const f = document.getElementById('favicon'); if (!f) return;
+      fetch('/assets/img/favicon.png', { method: 'HEAD' }).then(r => {
+        if (r.ok) { f.href = '/assets/img/favicon.png?v=' + Date.now(); }
+        else { return fetch('/assets/img/favicon.ico', { method: 'HEAD' }); }
+      }).then(r2 => { if (r2 && r2.ok) { f.href = '/assets/img/favicon.ico?v=' + Date.now(); } }).catch(()=>{});
+    })();
+  </script>
+</head> 
 <body>
   <!-- Barra de navegación superior -->
   <nav id="top-bar">
@@ -53,16 +65,19 @@
   <!-- Cuadro del mapa (emergente) -->
   <div id="map-popup" class="hidden">
     <div id="map-content">
+      <button id="map-close" aria-label="Cerrar mapa">✕</button>
       <h2>Mapa del Mundo</h2>
-      <button class="map-location" data-location="plaza">Plaza Gato</button>
-      <button class="map-location" data-location="techo1">Techo 1</button>
-      <button class="map-location" data-location="techo2">Techo 2</button>
-      <button class="map-location" data-location="casa">Tu casa</button>
-      <button id="close-map">Cerrar</button>
+      <div class="map-wrapper">
+        <img id="map-image" src="../assets/img/mapa_mundo.png" alt="Mapa del Mundo">
+        <!-- Hotspots posicionados con porcentajes sobre la imagen -->
+        <button class="map-hotspot" data-location="fabrica" style="left:8%; top:8%; width:22%; height:22%;"></button>
+        <button class="map-hotspot" data-location="jardin" style="right:8%; top:8%; width:22%; height:22%;"></button>
+        <button class="map-hotspot" data-location="taberna" style="left:6%; bottom:8%; width:26%; height:22%;"></button>
+        <button class="map-hotspot" data-location="tienda" style="right:6%; bottom:8%; width:26%; height:22%;"></button>
+        <button class="map-hotspot" data-location="techo" style="left:38%; top:34%; width:24%; height:24%; border-radius:50%;"></button>
+      </div>
     </div>
   </div>
-
-  <script src="../scripts/mundo.js"></script>
 
   <!-- Selector visual de color -->
   <div id="color-popup" class="hidden">
@@ -104,5 +119,6 @@
     </div>
   </div>
 
+  <script src="../scripts/mundo.js"></script>
 </body>
 </html>

@@ -114,12 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ————— Welcome message & chat —————
-  const welcomeMessage = document.createElement('p');
-  welcomeMessage.textContent = '¡Bienvenid@ al mundo de CluBex!';
-  chatLog.appendChild(welcomeMessage);
-  chatLog.scrollTop = chatLog.scrollHeight;
-
   sendMessageButton.addEventListener('click', sendMessage);
   chatInput.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
@@ -128,10 +122,33 @@ document.addEventListener('DOMContentLoaded', () => {
   function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
-    const msgElem = document.createElement('p');
-    msgElem.textContent = `${currentUsername}: ${text}`;
-    chatLog.appendChild(msgElem);
-    while (chatLog.children.length > 50) chatLog.removeChild(chatLog.firstChild);
+    const sid = SCENARIOS[currentIndex].id;
+    const msg = { user: currentUsername, text, ts: Date.now() };
+
+    // añadir al array, podar y persistir
+    messagesByScenario[sid].push(msg);
+    pruneMessages(sid);
+    persistChats();
+
+    // renderizar sólo el mensaje nuevo
+    const row = document.createElement('div');
+    row.className = 'chat-msg me';
+    const textNode = document.createElement('div');
+    textNode.className = 'chat-text';
+    textNode.textContent = msg.text;
+    const meta = document.createElement('div');
+    meta.className = 'chat-meta';
+    meta.textContent = `${msg.user} • ${new Date(msg.ts).toLocaleTimeString()}`;
+    row.appendChild(textNode);
+    row.appendChild(meta);
+    chatLog.appendChild(row);
+
+    // Mantener límite visual por número (seguridad)
+    while (chatLog.children.length > MAX_MESSAGES_PER_SCENARIO) chatLog.removeChild(chatLog.firstChild);
+
+    // Mantener límite visual por tamaño (altura)
+    pruneVisibleMessages(sid);
+
     chatInput.value = '';
     chatLog.scrollTop = chatLog.scrollHeight;
   }
@@ -200,6 +217,94 @@ document.addEventListener('DOMContentLoaded', () => {
   const leftBtn = document.getElementById('left-jump');
   const rightBtn = document.getElementById('right-jump');
 
+  // Chat por escenario (persistente SOLO durante la sesión del usuario)
+  const SESSION_CHAT_KEY_BASE = 'clubex_chat_by_scenario_';
+  const SESSION_CHAT_KEY = SESSION_CHAT_KEY_BASE + usernameKey; // por usuario, en sessionStorage
+  const MAX_MESSAGES_PER_SCENARIO = 200; // ajusta según necesidad
+  let messagesByScenario = {};
+
+  // Cargar desde sessionStorage si existe (esto hace que en cada nuevo inicio de sesión el chat aparezca vacío)
+  try {
+    messagesByScenario = JSON.parse(sessionStorage.getItem(SESSION_CHAT_KEY) || '{}') || {};
+  } catch (e) {
+    messagesByScenario = {};
+  }
+
+  // Asegura que cada escenario tenga un array (si venimos de sessionStorage vacío, se inicializa vacío)
+  SCENARIOS.forEach(s => { if (!Array.isArray(messagesByScenario[s.id])) messagesByScenario[s.id] = []; });
+
+  function pruneMessages(sid) {
+    const arr = messagesByScenario[sid] || [];
+    if (arr.length > MAX_MESSAGES_PER_SCENARIO) {
+      messagesByScenario[sid] = arr.slice(-MAX_MESSAGES_PER_SCENARIO);
+    }
+  }
+
+  function persistChats() {
+    // prune all before saving
+    SCENARIOS.forEach(s => { if (messagesByScenario[s.id] && messagesByScenario[s.id].length > MAX_MESSAGES_PER_SCENARIO) {
+      messagesByScenario[s.id] = messagesByScenario[s.id].slice(-MAX_MESSAGES_PER_SCENARIO);
+    }});
+    try {
+      sessionStorage.setItem(SESSION_CHAT_KEY, JSON.stringify(messagesByScenario));
+    } catch (e) {
+      console.warn('No se pudo guardar chat en sessionStorage:', e);
+    }
+  }
+
+  function pruneVisibleMessages(sid) {
+    // Remove oldest messages until the chat content fits the visible height
+    const arr = messagesByScenario[sid] || [];
+    // Ensure DOM corresponds to arr
+    while (chatLog.scrollHeight > chatLog.clientHeight && arr.length > 1) {
+      // remove earliest message from both storage and DOM
+      arr.shift();
+      if (chatLog.firstChild) chatLog.removeChild(chatLog.firstChild);
+    }
+    // Persist after pruning
+    persistChats();
+  }
+
+  function renderChatMessages(messages) {
+    chatLog.innerHTML = '';
+    messages.forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'chat-msg' + (m.system ? ' system' : (m.user === currentUsername ? ' me' : ''));
+
+      const textNode = document.createElement('div');
+      textNode.className = 'chat-text';
+      textNode.textContent = m.text;
+
+      const meta = document.createElement('div');
+      meta.className = 'chat-meta';
+      meta.textContent = `${m.user} • ${new Date(m.ts).toLocaleTimeString()}`;
+
+      row.appendChild(textNode);
+      row.appendChild(meta);
+      chatLog.appendChild(row);
+    });
+
+    // Now prune visible overflow so no vertical scrollbar appears
+    const sid = SCENARIOS[currentIndex].id;
+    pruneVisibleMessages(sid);
+
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  // Llamar esto cuando cambias de escenario
+  function loadChatForCurrentScenario() {
+    const sid = SCENARIOS[currentIndex].id;
+    const msgs = messagesByScenario[sid] || [];
+    // si no hay mensajes, crear uno de bienvenida por defecto
+    if (!msgs || msgs.length === 0) {
+      const welcome = { user: 'CluBex', text: `¡Bienvenid@ a ${SCENARIOS[currentIndex].label}!`, ts: Date.now(), system: true };
+      messagesByScenario[sid] = messagesByScenario[sid] || [];
+      messagesByScenario[sid].push(welcome);
+      persistChats();
+    }
+    renderChatMessages(messagesByScenario[sid]);
+  }
+
   function changeRoofImage(fileName) {
     if (!roofEl) return;
     const imgPath = `/img/${fileName}`;
@@ -212,24 +317,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setScenario(index) {
-    index = Math.max(0, Math.min(index, SCENARIOS.length - 1));
-    currentIndex = index;
+    const len = SCENARIOS.length;
+    // navegación circular (modulo, siempre dentro de [0,len-1])
+    currentIndex = ((index % len) + len) % len;
     const s = SCENARIOS[currentIndex];
     changeRoofImage(s.img);
     updateJumpButtons();
+    // cargar chat del escenario actual (ver sección de chat)
+    loadChatForCurrentScenario();
   }
 
   function updateJumpButtons() {
-    const prev = SCENARIOS[Math.max(0, currentIndex - 1)];
-    const next = SCENARIOS[Math.min(SCENARIOS.length - 1, currentIndex + 1)];
-    if (leftBtn) {
-      if (currentIndex === 0) { leftBtn.textContent = '← Inicio'; leftBtn.disabled = true; leftBtn.style.opacity = '0.6'; }
-      else { leftBtn.textContent = `← ${prev.label}`; leftBtn.disabled = false; leftBtn.style.opacity = '1'; }
-    }
-    if (rightBtn) {
-      if (currentIndex === SCENARIOS.length - 1) { rightBtn.textContent = 'Fin →'; rightBtn.disabled = true; rightBtn.style.opacity = '0.6'; }
-      else { rightBtn.textContent = `${next.label} →`; rightBtn.disabled = false; rightBtn.style.opacity = '1'; }
-    }
+    const len = SCENARIOS.length;
+    const prev = SCENARIOS[(currentIndex - 1 + len) % len];
+    const next = SCENARIOS[(currentIndex + 1) % len];
+    if (leftBtn) { leftBtn.textContent = `← ${prev.label}`; leftBtn.disabled = false; leftBtn.style.opacity = '1'; }
+    if (rightBtn) { rightBtn.textContent = `${next.label} →`; rightBtn.disabled = false; rightBtn.style.opacity = '1'; }
   }
 
   leftBtn?.addEventListener('click', () => setScenario(currentIndex - 1));
@@ -244,6 +347,73 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!confirm('¿Cerrar sesión?')) return;
     localStorage.removeItem('clubex_username');
     localStorage.removeItem(popupSeenKey);
+    // limpiar chat de sesión de este usuario al hacer logout
+    try { sessionStorage.removeItem(SESSION_CHAT_KEY); } catch (e) { /* ignore */ }
     window.location.href = '/html/index.html';
   });
+
+  /* ————— Mapa interactivo (modal con hotspots) ————— */
+  const mapButton = document.getElementById('map-button');
+  const mapPopup  = document.getElementById('map-popup');
+  const mapClose  = document.getElementById('map-close');
+  const mapHotspots = Array.from(document.querySelectorAll('.map-hotspot'));
+
+  function openMap() {
+    if (!mapPopup) return;
+    mapPopup.classList.remove('hidden');
+    mapPopup.style.display = 'flex';
+    document.documentElement.classList.add('modal-open');
+  }
+  function closeMap() {
+    if (!mapPopup) return;
+    mapPopup.classList.add('hidden');
+    mapPopup.style.display = 'none';
+    document.documentElement.classList.remove('modal-open');
+  }
+
+  function goToScenarioById(id) {
+    const idx = SCENARIOS.findIndex(s => s.id === id);
+    if (idx >= 0) {
+      setScenario(idx);
+    } else {
+      console.warn('Escenario no encontrado en mapa:', id);
+    }
+  }
+
+  mapButton?.addEventListener('click', openMap);
+  mapClose?.addEventListener('click', closeMap);
+
+  // cerrar si se hace click fuera del contenido
+  // si el usuario hace click fuera del contenido, cerrar
+  mapPopup?.addEventListener('click', (ev) => { if (ev.target === mapPopup) closeMap(); });
+
+  // placeholder si la imagen no está disponible
+  const mapImage = document.getElementById('map-image');
+  if (mapImage) {
+    mapImage.addEventListener('error', () => {
+      mapImage.style.display = 'none';
+      const wrapper = document.querySelector('.map-wrapper');
+      if (wrapper && !wrapper.querySelector('.map-placeholder')) {
+        const ph = document.createElement('div');
+        ph.className = 'map-placeholder';
+        ph.textContent = 'Mapa no disponible (coloca ../assets/img/mapa_mundo.png)';
+        wrapper.appendChild(ph);
+      }
+    });
+  }
+
+  // hotspots
+  mapHotspots.forEach(h => {
+    h.addEventListener('click', () => {
+      const id = h.dataset.location;
+      goToScenarioById(id);
+      closeMap();
+    });
+  });
+
+  // Esc para cerrar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMap();
+  });
+
 });

@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sliding Login Form</title>
     <link rel="stylesheet" href="../styles/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cludflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+    <link id="favicon" rel="icon" href="/assets/img/favicon.png">
+    <script>
+      // Activar favicon subido y evitar cache viejo añadiendo ?v=timestamp si existe
+      (function(){
+        const f = document.getElementById('favicon'); if (!f) return;
+        fetch('/assets/img/favicon.png', { method: 'HEAD' }).then(r => {
+          if (r.ok) { f.href = '/assets/img/favicon.png?v=' + Date.now(); }
+          else { return fetch('/assets/img/favicon.ico', { method: 'HEAD' }); }
+        }).then(r2 => { if (r2 && r2.ok) { f.href = '/assets/img/favicon.ico?v=' + Date.now(); } }).catch(()=>{});
+      })();
+    </script>
 </head>
 <body>
     <div class="container" id="main">
